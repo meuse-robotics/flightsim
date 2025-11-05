@@ -24,7 +24,7 @@ namespace FlightSim
         private float wingspan = 11f; //翼の長さ
         private float groundEffectCoef = 16f; //係数
         private float groundEffect = 1f; //揚力を上げる効果
-        
+        private float staticCoef = 10f;
         #endregion
 
         void Start(){}
@@ -104,7 +104,9 @@ namespace FlightSim
             speedCoef = ForwardSpeed / maxSpeed;
             // 入力に比例したトルク
             Vector3 pitchTorque = input.Pitch * PitchCoef * transform.right * speedCoef;
-            rb.AddTorque(pitchTorque);
+            // 静安定トルク
+            Vector3 staticTorque = -staticCoef * speedCoef * transform.right;
+            rb.AddTorque(pitchTorque + staticTorque);
         }
 
         void HandleRoll()
@@ -167,4 +169,5 @@ namespace FlightSim
         #endregion
         
     }
+
 }
