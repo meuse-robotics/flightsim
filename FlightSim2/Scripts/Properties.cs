@@ -24,7 +24,10 @@ namespace FlightSim
         private float wingspan = 11f; //翼の長さ
         private float groundEffectCoef = 16f; //係数
         private float groundEffect = 1f; //揚力を上げる効果
-        private float staticCoef = 10f;
+        public float staticCoef = 1f;
+        public float rollServoCoef = 0.5f; // ロールサーボの強さ 追加
+        public float rollServoDamping = 0.1f; // ロールサーボのダンピング　追加
+        
         #endregion
 
         void Start(){}
@@ -116,9 +119,24 @@ namespace FlightSim
             flatRight.y = 0f;
             flatRight = flatRight.normalized;
             rollAngle = Vector3.SignedAngle(transform.right, flatRight, transform.forward);
-            
-            Vector3 rollTorque = -input.Roll * RollCoef * transform.forward * speedCoef;
-            rb.AddTorque(rollTorque);
+
+            if (!input.isAutoRoll)
+            {
+                // 通常のロール制御
+                Vector3 rollTorque = -input.Roll * RollCoef * transform.forward * speedCoef;
+                rb.AddTorque(rollTorque);
+            }
+            else
+            {
+                // サーボ機能：現在のロール角度を0に近づける　追加
+                float servoStrength = -rollAngle * rollServoCoef; // ロール角度に応じた補正力
+                float currentRollRate = Vector3.Dot(rb.angularVelocity, transform.forward); // 現在のロール回転速度
+                float servoDamping = -currentRollRate * rollServoDamping; // ダンピング項
+
+                Vector3 servoTorque = (servoStrength + servoDamping) * transform.forward * speedCoef;
+
+                rb.AddTorque(servoTorque);
+            }
         }
 
         void HandleYaw()
@@ -169,5 +187,4 @@ namespace FlightSim
         #endregion
         
     }
-
 }
