@@ -20,8 +20,11 @@ namespace FlightSim
         private float currentAlt;
         public float CurrentAlt
         {
-            get{ return currentAlt; }
+            get { return currentAlt; }
         }
+        public float AltitudeServoKp = 0.02f;    // 高度偏差に対するゲイン
+        public float AltitudeServoKd = 0.5f;     // 垂直速度に対するダンピング（負の速度に比例してスロットルを増減）
+        public float AltitudeServoMaxThrottleRate = 0.8f; // 1秒あたりのスロットル最大変化量
         #endregion
 
         #region Custom Methods
@@ -69,7 +72,32 @@ namespace FlightSim
         {
             if(Engine != null)
             {
-                rb.AddForce(Engine.CalculateForce(Input.RateThrottle));
+                if (Input.isAutoLevel)
+                {
+                    // 独自の高度サーボ（I項は使わない）。低い線形ダンピング環境でも暴れにくいPD風制御＋スロットルレート制限
+                    float altError = Input.targetHeight - rb.transform.position.y;
+                    float verticalSpeed = rb.linearVelocity.y;
+
+                    // PD制御：高度偏差と垂直速度（降下/上昇）を使う
+                    float control = AltitudeServoKp * altError + AltitudeServoKd * (-verticalSpeed);
+
+                    // ベーススロットルを残しつつ制御量を反映
+                    float throttleTarget = Mathf.Clamp01(0.5f + control);
+
+                    // スロットル変化量を制限（1秒あたりの最大変化量を使う）
+                    float maxDelta = AltitudeServoMaxThrottleRate * Time.deltaTime;
+                    float appliedThrottle = Mathf.MoveTowards(Input.RateThrottle, throttleTarget, maxDelta);
+
+                    // エンジン出力に適用
+                    rb.AddForce(Engine.CalculateForce(appliedThrottle));
+
+                    // UIや他のロジックと整合させるためにRateThrottleを更新
+                    Input.RateThrottle = appliedThrottle;
+                }
+                else
+                {
+                    rb.AddForce(Engine.CalculateForce(Input.RateThrottle));
+                }
             }
         }
 

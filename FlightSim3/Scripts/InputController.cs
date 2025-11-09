@@ -22,12 +22,10 @@ namespace FlightSim
         public float RateThrottle; //レート制御スロットル
         private float throttleRate = 1f; //変化率
         public float Trim = 0f;
-        /*public bool PitchChanged = false;
-        public bool RollChanged = false;
-        public bool YawChanged = false;
-        public bool FlapChanged = false;
-        private Vector2 lastRStick = Vector2.zero;
-        private Vector2 lastLStick = Vector2.zero;*/
+        public bool isAutoRoll = false;
+        public bool isAutoLevel = false;
+        public float targetHeight = 0f;
+        private Rigidbody rb;
         #endregion
 
         #region Builtin Methods
@@ -80,6 +78,21 @@ namespace FlightSim
             if (!ctx.canceled) return;
             Trim -= 0.1f;
             if (Trim < -0.5f) Trim = -0.5f;
+        }
+
+        //AutoRollのコールバック（入力受け取り）
+        public void OnAutoRoll(InputAction.CallbackContext ctx)
+        {
+            if (!ctx.canceled) return;
+            isAutoRoll = !isAutoRoll;
+        }
+
+        //AutoLevelのコールバック（入力受け取り）
+        public void OnAutoLevel(InputAction.CallbackContext ctx)
+        {
+            if (!ctx.canceled) return;
+            isAutoLevel = !isAutoLevel;
+            targetHeight = rb.transform.position.y;
         }
 
         void Start()
