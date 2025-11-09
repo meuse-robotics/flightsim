@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -22,13 +23,22 @@ namespace FlightSim
         public float RateThrottle; //レート制御スロットル
         private float throttleRate = 1f; //変化率
         public float Trim = 0f;
-        /*public bool PitchChanged = false;
-        public bool RollChanged = false;
-        public bool YawChanged = false;
-        public bool FlapChanged = false;
-        private Vector2 lastRStick = Vector2.zero;
-        private Vector2 lastLStick = Vector2.zero;*/
+        public bool isAutoRoll = false;
+        public bool isAutoLevel = false;
+        public float targetHeight = 0f;
+        private Rigidbody rb;
         #endregion
+
+        void Awake()
+        {
+            var playerInput = GetComponent<PlayerInput>();
+            Debug.Log("Current Action Map: " + playerInput.currentActionMap.name);
+            foreach (var action in playerInput.currentActionMap.actions)
+            {
+                Debug.Log("Action: " + action.name);
+            }
+        }
+
 
         #region Builtin Methods
         //RStickのコールバック（入力受け取り）
@@ -67,24 +77,41 @@ namespace FlightSim
             brakeInput = ctx.ReadValue<float>();
         }
 
+        //TrimDownのコールバック（入力受け取り）
         public void OnTrimDown(InputAction.CallbackContext ctx)
         {
-            Debug.Log("ok");
+            //Debug.Log("ok");
             if (!ctx.canceled) return;
-            Trim += 0.1f;
+            Trim += 0.05f;
             if (Trim > 0.5f) Trim = 0.5f;
         }
-        
+
+        //TrimUpのコールバック（入力受け取り）
         public void OnTrimUp(InputAction.CallbackContext ctx)
         {
             if (!ctx.canceled) return;
-            Trim -= 0.1f;
+            Trim -= 0.05f;
             if (Trim < -0.5f) Trim = -0.5f;
+        }
+
+        //AutoRollのコールバック（入力受け取り）
+        public void OnAutoRoll(InputAction.CallbackContext ctx)
+        {
+            if (!ctx.canceled) return;
+            isAutoRoll = !isAutoRoll;
+        }
+
+        //AutoLevelのコールバック（入力受け取り）
+        public void OnAutoLevel(InputAction.CallbackContext ctx)
+        {
+            if (!ctx.canceled) return;
+            isAutoLevel = !isAutoLevel;
+            targetHeight = rb.transform.position.y;
         }
 
         void Start()
         {
-            
+            rb = GetComponent<Rigidbody>(); //Rigidbodyを取得
         }
 
         void Update()
