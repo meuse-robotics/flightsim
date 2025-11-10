@@ -69,14 +69,14 @@ namespace FlightSim
         {
             //Debug.Log("ok");
             if (!ctx.canceled) return;
-            Trim += 0.1f;
+            Trim += 0.05f;
             if (Trim > 0.5f) Trim = 0.5f;
         }
         
         public void OnTrimUp(InputAction.CallbackContext ctx)
         {
             if (!ctx.canceled) return;
-            Trim -= 0.1f;
+            Trim -= 0.05f;
             if (Trim < -0.5f) Trim = -0.5f;
         }
 
@@ -127,4 +127,5 @@ namespace FlightSim
         #endregion
     }
 }
+
 
