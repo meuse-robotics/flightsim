@@ -97,7 +97,7 @@ namespace FlightSim
 
         void Start()
         {
-            
+            rb = GetComponent<Rigidbody>(); //Rigidbodyを取得
         }
 
         void Update()
@@ -127,3 +127,4 @@ namespace FlightSim
         #endregion
     }
 }
+
