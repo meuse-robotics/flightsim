@@ -25,7 +25,7 @@ namespace FlightSim
         private float groundEffectCoef = 16f; //係数
         private float groundEffect = 1f; //揚力を上げる効果
         public float staticCoef = 1f;
-        public float rollServoCoef = 0.5f; // ロールサーボの強さ 追加
+        public float rollServoCoef = -100f; // ロールサーボの強さ 追加
         public float rollServoDamping = 0.1f; // ロールサーボのダンピング　追加
         
         #endregion
@@ -187,4 +187,5 @@ namespace FlightSim
         #endregion
         
     }
+
 }
