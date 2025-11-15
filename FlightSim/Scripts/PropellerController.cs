@@ -7,7 +7,7 @@ namespace FlightSim
         #region Variables
         private MeshRenderer meshRenderer; //オブジェクトの描画を担当
         private Material[] mats; //使われているマテリアル
-        public Material blurredMat;
+        //public Material blurredMat;
         #endregion
 
         void Start()
@@ -35,13 +35,14 @@ namespace FlightSim
                 mats[1].color = c; //再設定
                 meshRenderer.materials = mats;
 
-                c = blurredMat.color;
-                if(throttle > 0.1f) c.a = 1f;//throttle;
+                /*c = blurredMat.color;
+                if(throttle > 0.1f) c.a = 1f;
                 else c.a = 0f;
-                blurredMat.color = c;
+                blurredMat.color = c;*/
             }
         }
         #endregion
     }
 
 }
+
