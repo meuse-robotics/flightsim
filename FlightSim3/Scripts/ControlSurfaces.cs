@@ -81,12 +81,17 @@ namespace FlightSim
                 if (Quaternion.Angle(ControlSurfaceMesh.localRotation, targetRotation) < 0.1f)
                     rotSurface = false;
             }
-            if(movSurface)
+            if (movSurface)
             {
-                Vector3 pos = ControlSurfaceMesh.localPosition;
-                pos.z = origMoves.z + wantedMove;
-                ControlSurfaceMesh.localPosition = pos;
-                movSurface = false;
+                Vector3 current = ControlSurfaceMesh.localPosition;
+                Vector3 target = new Vector3(current.x, current.y, origMoves.z + wantedMove);
+
+                // 0.1f は補間速度。0.05〜0.2 で調整
+                ControlSurfaceMesh.localPosition = Vector3.Lerp(current, target, Time.deltaTime * 10f);
+
+                // ほぼ到達したら完了扱い
+                if (Vector3.Distance(current, target) < 0.001f)
+                    movSurface = false;
             }
         }
         #endregion
@@ -143,3 +148,4 @@ namespace FlightSim
     }
 
 }
+
