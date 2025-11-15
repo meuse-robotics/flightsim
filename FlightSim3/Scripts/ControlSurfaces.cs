@@ -9,7 +9,9 @@ namespace FlightSim
         Rudder,
         Flap,
         L_Aileron,
-        R_Aileron
+        R_Aileron,
+        L_Controller,
+        R_Controller
     }
     public class ControlSurfaces : MonoBehaviour
     {
@@ -21,6 +23,11 @@ namespace FlightSim
         private float wantedAngle; //目標角度
         private float lastWantedAngle = 0f; //前回目標角度
         private bool rotSurface = false; //角度を更新する
+        private Vector3 origMoves; //イニシャル位置
+        private float maxMove = 0.1f; //最大可動距離
+        private float wantedMove; //目標位置
+        private float lastWantedMove = 0f; //前回目標位置
+        private bool movSurface = false; //位置を更新する
         private float smoothSpeed = 5f; //ゆっくり動かす程度
         #endregion
 
@@ -28,6 +35,7 @@ namespace FlightSim
         void Start()
         {
             origAngles = ControlSurfaceMesh.transform.localEulerAngles;
+            origMoves = ControlSurfaceMesh.transform.localPosition;
         }
 
         void Update()
@@ -52,6 +60,12 @@ namespace FlightSim
                     case ControlSurfaceType.R_Aileron:
                         localAxis = Vector3.back;
                         break;
+                    case ControlSurfaceType.L_Controller:
+                        localAxis = Vector3.forward;
+                        break;
+                    case ControlSurfaceType.R_Controller:
+                        localAxis = Vector3.forward;
+                        break;
                     default:
                         localAxis = Vector3.forward;
                         break;
@@ -67,6 +81,13 @@ namespace FlightSim
                 if (Quaternion.Angle(ControlSurfaceMesh.localRotation, targetRotation) < 0.1f)
                     rotSurface = false;
             }
+            if(movSurface)
+            {
+                Vector3 pos = ControlSurfaceMesh.localPosition;
+                pos.z = origMoves.z + wantedMove;
+                ControlSurfaceMesh.localPosition = pos;
+                movSurface = false;
+            }
         }
         #endregion
 
@@ -74,6 +95,7 @@ namespace FlightSim
         public void HandleControlSurface(InputController input)
         {
             float inputValue = 0f;
+            float inputValue2 = 0f;
             //inputValue = input.Pitch;
             switch(type)
             {
@@ -92,6 +114,14 @@ namespace FlightSim
                 case ControlSurfaceType.R_Aileron:
                     inputValue = input.Roll;
                     break;
+                case ControlSurfaceType.L_Controller:
+                    inputValue = input.Roll;
+                    inputValue2 = input.Pitch;
+                    break;
+                case ControlSurfaceType.R_Controller:
+                    inputValue = input.Roll;
+                    inputValue2 = input.Pitch;
+                    break;
                 default:
                     break;
             }
@@ -101,7 +131,15 @@ namespace FlightSim
                 //入力が変化したら動かす
                 rotSurface = true;
             }
+            wantedMove = maxMove * inputValue2;
+            if (Mathf.Abs(wantedMove - lastWantedMove) > 0.005f)
+            {
+                //入力が変化したら動かす
+                movSurface = true;
+                lastWantedMove = wantedMove;
+            }
         }
         #endregion
     }
+
 }
